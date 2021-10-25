@@ -1,0 +1,99 @@
+---
+title: "TidyVerse Data 607"
+author: "Wiktoria Gnojek"
+date: "10/24/2021"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+In this assignment, you’ll practice collaborating around a code project with GitHub.  
+
+GitHub repository:https://github.com/acatlin/FALL2021TIDYVERSE
+
+**Loading Library**
+```{r}
+library(tidyverse)
+library(DT)
+```
+The data set chosen can be found at this url; https://www.kaggle.com/mysarahmadbhat/alcohol-consumption
+
+In this data set, we will be looking at alcoholic consumption per country per type of alcohol.
+
+It is important to note;
+
+**Units:** Average serving sizes per person.
+
+**Source:** World Health Organisation, Global Information System on Alcohol and Health (GISAH), 2010.
+
+The csv generated from Kaggle can be found under this GitHub link; https://github.com/WiktoriaGnojek/TidyVerse-Part1/blob/main/drinks.csv
+
+**Loading the CSV**
+
+One of the first functions we are using is readr from the tidyverse package. 
+```{r}
+
+alcohol <- read.csv("https://raw.githubusercontent.com/WiktoriaGnojek/TidyVerse-Part1/main/drinks.csv")
+alcohol %>%
+  datatable()
+```
+Next we will be using functions from the dplyr and ggplot2 libraries.
+
+Which countries consume more than 250 servings of beer?
+```{r}
+beer <- alcohol %>%
+  select(country, beer_servings, spirit_servings) %>%
+  filter(beer_servings >= 250) %>%
+  arrange(desc(beer_servings))
+head(beer)
+ggplot(beer, aes(x = fct_reorder(country, beer_servings), 
+                      y = beer_servings)) + 
+  geom_col(fill = "lightblue") + 
+  labs(x = "Country", y = "Beer Servings", 
+      caption = "Countries with Beer Servings Equal to or Above 250") + 
+  coord_flip()
+```
+
+Compare this to countries who consume more than 250 servings of spirits?
+```{r}
+spirits <- alcohol %>%
+  select(country, spirit_servings, beer_servings) %>%
+  filter(spirit_servings >= 250) %>%
+  arrange(desc(spirit_servings))
+head(spirits)
+ggplot(spirits, aes(x = fct_reorder(country, spirit_servings), 
+                      y = spirit_servings)) + 
+  geom_col(fill = "lightblue") + 
+  labs(x = "Country", y = "Spirit Servings", 
+      caption = "Countries with Spirit Servings Equal to or Above 250") + 
+  coord_flip()
+```
+
+More Tidyverse functions, this time we will be creating ratios. 
+
+**Beer Vs. Spirits** 
+
+Per countries with highest beer consumption, how many beer servings are there per spirit servings?
+```{r}
+beer <- beer %>%
+  mutate(beer_to_spirits_ratio = (beer_servings/spirit_servings)) %>%
+  arrange(desc(beer_to_spirits_ratio)) 
+beer
+```
+
+**Spirits Vs. Beer** 
+
+Per countries with highest spirit consumption, how many spirit servings are there per beer servings?
+```{r}
+spirits <- spirits %>%
+  mutate(spirits_to_beer_ratio = (spirit_servings/beer_servings)) %>%
+  arrange(desc(spirits_to_beer_ratio))
+spirits
+```
+
+Is there an inverse relationship, what can this lead us to conclude? 
+What would be the most efficient way to plot ratios or a relationship using ggplot2? 
+Outliers? Is there a common patter?
+
+
+
